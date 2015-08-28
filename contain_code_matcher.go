@@ -8,34 +8,36 @@ import (
 	"github.com/onsi/gomega/types"
 )
 
+// ContainCode succeeds if actual can be converted or read into to byte[], is valid go code and contains
+// the given go code. Indentation is ignored and the syntax of the given go code is not checked.
 func ContainCode(expected string) types.GomegaMatcher {
-	return &ContainCodeMatcher{ExpectedCode: unindent(expected)}
+	return &containCodeMatcher{expectedCode: unindent(expected)}
 }
 
-type ContainCodeMatcher struct {
-	BeValidGoCodeMatcher
-	ExpectedCode string
+type containCodeMatcher struct {
+	beValidGoCodeMatcher
+	expectedCode string
 }
 
-func (m *ContainCodeMatcher) Match(actual interface{}) (success bool, err error) {
-	isCompilable, err := m.BeValidGoCodeMatcher.Match(actual)
+func (m *containCodeMatcher) Match(actual interface{}) (success bool, err error) {
+	isCompilable, err := m.beValidGoCodeMatcher.Match(actual)
 	if isCompilable == false || err != nil {
 		return isCompilable, err
 	}
 
-	return strings.Contains(string(m.source), m.ExpectedCode), nil
+	return strings.Contains(string(m.source), m.expectedCode), nil
 }
 
-func (m *ContainCodeMatcher) FailureMessage(actual interface{}) (message string) {
+func (m *containCodeMatcher) FailureMessage(actual interface{}) (message string) {
 	if m.outIsEmpty || m.compileError != nil {
-		return m.BeValidGoCodeMatcher.FailureMessage(actual)
+		return m.beValidGoCodeMatcher.FailureMessage(actual)
 	}
 
-	return fmt.Sprintf("Expected output:\n%s\nto contain the code:\n%s", m.indentSource(), indent([]byte(m.ExpectedCode)))
+	return fmt.Sprintf("Expected output:\n%s\nto contain the code:\n%s", m.indentSource(), indent([]byte(m.expectedCode)))
 }
 
-func (m *ContainCodeMatcher) NegatedFailureMessage(_ interface{}) (message string) {
-	return fmt.Sprintf("Expected output:\n%s\nnot to contain the code\n%s", m.indentSource(), indent([]byte(m.ExpectedCode)))
+func (m *containCodeMatcher) NegatedFailureMessage(_ interface{}) (message string) {
+	return fmt.Sprintf("Expected output:\n%s\nnot to contain the code\n%s", m.indentSource(), indent([]byte(m.expectedCode)))
 }
 
 func unindent(input string) string {

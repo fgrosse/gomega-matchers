@@ -1,40 +1,28 @@
 package matchers
 
 import (
-	"bytes"
 	"fmt"
+
 	"github.com/onsi/gomega/format"
 	"github.com/onsi/gomega/types"
 )
 
+// BeValidGoCode succeeds if actual can be converted or read into to byte[] and contains valid go code.
 func BeValidGoCode() types.GomegaMatcher {
-	return &BeValidGoCodeMatcher{}
+	return &beValidGoCodeMatcher{}
 }
 
-type BeValidGoCodeMatcher struct {
+type beValidGoCodeMatcher struct {
 	codeParsingMatcher
 	outIsEmpty bool
 }
 
-func (m *BeValidGoCodeMatcher) Match(actual interface{}) (success bool, err error) {
-	var output *bytes.Buffer
-	switch a := actual.(type) {
-	case *bytes.Buffer:
-		output = a
-	default:
-		return false, fmt.Errorf("BeValidGoCode expects actual to be an instance of *bytes.Buffer")
-	}
-
-	if output.Len() == 0 {
-		m.outIsEmpty = true
-		return false, nil
-	}
-
-	_, m.compileError = m.parse(output)
+func (m *beValidGoCodeMatcher) Match(actual interface{}) (success bool, err error) {
+	_, m.outIsEmpty, m.compileError = m.parse(actual)
 	return m.compileError == nil, nil
 }
 
-func (m *BeValidGoCodeMatcher) FailureMessage(_ interface{}) (message string) {
+func (m *beValidGoCodeMatcher) FailureMessage(_ interface{}) (message string) {
 	if m.outIsEmpty {
 		return "Expected output to contain compilable go code but it was empty"
 	}
@@ -42,6 +30,6 @@ func (m *BeValidGoCodeMatcher) FailureMessage(_ interface{}) (message string) {
 	return fmt.Sprintf("Expected output:\n%s\nto contain compilable go code but got parser error:\n    %s", indent(m.source), m.compileError)
 }
 
-func (m *BeValidGoCodeMatcher) NegatedFailureMessage(_ interface{}) (message string) {
+func (m *beValidGoCodeMatcher) NegatedFailureMessage(_ interface{}) (message string) {
 	return format.Message(fmt.Sprintf("%s", m.source), "not to contain compilable go code")
 }

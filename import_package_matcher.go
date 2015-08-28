@@ -5,18 +5,20 @@ import (
 	"github.com/onsi/gomega/types"
 )
 
+// ImportPackage succeeds if actual can be converted or read into to byte[], is valid go code and
+// contains an import statement for the given package
 func ImportPackage(expected string) types.GomegaMatcher {
-	return &ImportPackageMatcher{ExpectedPackage: fmt.Sprintf("%q", expected)}
+	return &importPackageMatcher{expectedPackage: fmt.Sprintf("%q", expected)}
 }
 
-type ImportPackageMatcher struct {
-	BeValidGoCodeMatcher
-	ExpectedPackage   string
+type importPackageMatcher struct {
+	beValidGoCodeMatcher
+	expectedPackage   string
 	foundMoreThanOnce bool
 }
 
-func (m *ImportPackageMatcher) Match(actual interface{}) (success bool, err error) {
-	isCompilable, err := m.BeValidGoCodeMatcher.Match(actual)
+func (m *importPackageMatcher) Match(actual interface{}) (success bool, err error) {
+	isCompilable, err := m.beValidGoCodeMatcher.Match(actual)
 	if isCompilable == false || err != nil {
 		return isCompilable, err
 	}
@@ -24,7 +26,7 @@ func (m *ImportPackageMatcher) Match(actual interface{}) (success bool, err erro
 	m.foundMoreThanOnce = false
 	importFound := false
 	for _, importSpec := range m.astFile.Imports {
-		if importSpec.Path.Value == m.ExpectedPackage {
+		if importSpec.Path.Value == m.expectedPackage {
 			if importFound {
 				m.foundMoreThanOnce = true
 				return false, nil
@@ -37,18 +39,18 @@ func (m *ImportPackageMatcher) Match(actual interface{}) (success bool, err erro
 	return importFound, nil
 }
 
-func (m *ImportPackageMatcher) FailureMessage(actual interface{}) (message string) {
+func (m *importPackageMatcher) FailureMessage(actual interface{}) (message string) {
 	if m.outIsEmpty || m.compileError != nil {
-		return m.BeValidGoCodeMatcher.FailureMessage(actual)
+		return m.beValidGoCodeMatcher.FailureMessage(actual)
 	}
 
 	if m.foundMoreThanOnce {
-		return fmt.Sprintf("Expected output:\n%s\nto import package %s exactly once but found multiple times", m.indentSource(), m.ExpectedPackage)
+		return fmt.Sprintf("Expected output:\n%s\nto import package %s exactly once but found multiple times", m.indentSource(), m.expectedPackage)
 	}
 
-	return fmt.Sprintf("Expected output:\n%s\nto import package %s", m.indentSource(), m.ExpectedPackage)
+	return fmt.Sprintf("Expected output:\n%s\nto import package %s", m.indentSource(), m.expectedPackage)
 }
 
-func (m *ImportPackageMatcher) NegatedFailureMessage(_ interface{}) (message string) {
-	return fmt.Sprintf("Expected output:\n%s\nnot to import package %s", m.indentSource(), m.ExpectedPackage)
+func (m *importPackageMatcher) NegatedFailureMessage(_ interface{}) (message string) {
+	return fmt.Sprintf("Expected output:\n%s\nnot to import package %s", m.indentSource(), m.expectedPackage)
 }
