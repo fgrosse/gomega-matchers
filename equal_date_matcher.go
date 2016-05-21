@@ -53,12 +53,17 @@ func (m *equalTimeMatcher) format(actual interface{}, message string, expected i
 }
 
 func (m *equalTimeMatcher) formatObject(i interface{}) string {
-	value, err := toTime(i)
+	t, err := toTime(i)
 	if err != nil {
 		panic(err)
 	}
 
-	return format.Indent + fmt.Sprintf("<%T> %s", i, value.Format(time.RFC3339))
+	value := t.Format(time.RFC3339)
+	if t.IsZero() {
+		value = "zero time"
+	}
+
+	return format.Indent + fmt.Sprintf("<%T> %s", i, value)
 }
 
 func toTime(i interface{}) (time.Time, error) {
