@@ -2,9 +2,9 @@ package matchers_test
 
 import (
 	"time"
-	
-	. "github.com/onsi/gomega"
+
 	. "github.com/fgrosse/gomega-matchers"
+	. "github.com/onsi/gomega"
 )
 
 func Example() {
