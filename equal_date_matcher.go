@@ -27,6 +27,12 @@ type equalTimeMatcher struct{ expected time.Time }
 
 func (m *equalTimeMatcher) Match(actual interface{}) (success bool, err error) {
 	actualTime, err := toTime(actual)
+
+	if actualTime.IsZero() && m.expected.IsZero() {
+		// in this case we do not care about the location
+		return true, nil
+	}
+
 	return actualTime == m.expected, err
 }
 
