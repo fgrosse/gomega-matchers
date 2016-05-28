@@ -26,18 +26,8 @@ func EqualTime(expected interface{}) types.GomegaMatcher {
 type equalTimeMatcher struct{ expected time.Time }
 
 func (m *equalTimeMatcher) Match(actual interface{}) (success bool, err error) {
-	switch t := actual.(type) {
-	case time.Time:
-		return t == m.expected, nil
-	case string:
-		actualTime, err := time.Parse(time.RFC3339, t)
-		if err != nil {
-			return false, fmt.Errorf("could not parse actual value as RFC3339 formatted time string")
-		}
-		return actualTime == m.expected, nil
-	default:
-		return false, fmt.Errorf("actual value must either be a time.Time or a RFC3339 formatted string")
-	}
+	actualTime, err := toTime(actual)
+	return actualTime == m.expected, err
 }
 
 func (m *equalTimeMatcher) FailureMessage(actual interface{}) (message string) {
@@ -77,6 +67,6 @@ func toTime(i interface{}) (time.Time, error) {
 		}
 		return ti, err
 	default:
-		return time.Time{}, fmt.Errorf("value must either be a time.Time or a RFC3339 formatted string")
+		return time.Time{}, fmt.Errorf("value must either be a time.Time or a RFC3339 formatted string but is as %T", i)
 	}
 }
