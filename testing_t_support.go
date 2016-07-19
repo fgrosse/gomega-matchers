@@ -32,7 +32,7 @@ func buildTestingTGomegaFailHandler(t testingT) types.GomegaFailHandler {
 		stackTrace = strings.TrimSpace(stackTrace)
 		stackTrace = ansi.Color(stackTrace, StacktraceColor)
 
-		t.Errorf("\n%s\n%s", stackTrace, message)
+		t.Errorf("\n%s\n%s", stackTrace, ansi.Color(message, "red"))
 	}
 }
 
