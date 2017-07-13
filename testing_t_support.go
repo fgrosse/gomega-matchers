@@ -12,17 +12,13 @@ import (
 
 var StacktraceColor = ansi.ColorCode("gray")
 
-type testingT interface {
-	Errorf(format string, args ...interface{})
-}
-
 // RegisterExtendedTestingT is like gomega.RegisterTestingT but it also
 // colors the output and omits any gomega frames from the printed stacktrace.
 func RegisterExtendedTestingT(t types.GomegaTestingT) {
 	gomega.RegisterFailHandler(buildTestingTGomegaFailHandler(t))
 }
 
-func buildTestingTGomegaFailHandler(t testingT) types.GomegaFailHandler {
+func buildTestingTGomegaFailHandler(t types.GomegaTestingT) types.GomegaFailHandler {
 	return func(message string, callerSkip ...int) {
 		skip := 2 // initial runtime/debug.Stack frame + gomega-matchers.buildTestingTGomegaFailHandler frame
 		if len(callerSkip) > 0 {
@@ -32,7 +28,7 @@ func buildTestingTGomegaFailHandler(t testingT) types.GomegaFailHandler {
 		stackTrace = strings.TrimSpace(stackTrace)
 		stackTrace = ansi.Color(stackTrace, StacktraceColor)
 
-		t.Errorf("\n%s\n%s", stackTrace, ansi.Color(message, "red"))
+		t.Fatalf("\n%s\n%s", stackTrace, ansi.Color(message, "red"))
 	}
 }
 
