@@ -5,12 +5,12 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/mgutz/ansi"
 	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
 )
 
-var StacktraceColor = ansi.ColorCode("gray")
+// StacktraceColor is the ANSI color code used to print stack traces.
+var StacktraceColor = colorWhite
 
 // RegisterExtendedTestingT is like gomega.RegisterTestingT but it also
 // colors the output and omits any gomega frames from the printed stacktrace.
@@ -26,9 +26,9 @@ func buildTestingTGomegaFailHandler(t types.GomegaTestingT) types.GomegaFailHand
 		}
 		stackTrace := pruneStack(string(debug.Stack()), skip)
 		stackTrace = strings.TrimSpace(stackTrace)
-		stackTrace = ansi.Color(stackTrace, StacktraceColor)
+		stackTrace = colored(StacktraceColor, stackTrace)
 
-		t.Fatalf("\n%s\n%s", stackTrace, ansi.Color(message, "red"))
+		t.Fatalf("\n%s\n%s", stackTrace, colored(colorRed, message))
 	}
 }
 
