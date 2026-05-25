@@ -1,5 +1,10 @@
 [![GoDoc](https://img.shields.io/badge/gowalker-doc-blue.svg)][3]
 
+> [!WARNING]  
+> This repository has been archived because it isn't actively used anymore, and I do not want to spend time maintaining it.
+
+---
+
 A set of custom [gomega][1] matchers to test generated go code.
 
 Example of included new matchers:
